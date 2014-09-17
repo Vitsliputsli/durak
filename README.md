@@ -1,3 +1,5 @@
+<br>
+<b>run server:</b> <i>./dur s {port}</i>
 
-run server: ./dur s {port}
-run client: ./dur c {localhost} {port}
+<br>
+<b>run client:</b> <i>./dur c {localhost} {port}</i>
