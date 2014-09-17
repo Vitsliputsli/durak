@@ -1,5 +1,7 @@
-<br>
-<b>run server:</b> <i>./dur s {port}</i>
+<h2>Simple russian card game "durak"</h2>
 
 <br>
-<b>run client:</b> <i>./dur c {localhost} {port}</i>
+<b>run server:</b> <i>./server.sh {port}</i>
+
+<br>
+<b>run client:</b> <i>./client.sh {ip} {port}</i>
