@@ -1,7 +1,13 @@
-<h2>Simple russian card game "durak"</h2>
 
-<br>
-<b>run server:</b> <i>./server.sh {port}</i>
+### Multiplayer card game "Durak"
 
-<br>
-<b>run client:</b> <i>./client.sh {ip} {port}</i>
+Server run:
+```
+sh server.sh [port]
+```
+
+Client run:
+```
+sh client.sh [ip] [port]
+```
+
