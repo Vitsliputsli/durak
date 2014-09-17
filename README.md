@@ -1,3 +1,4 @@
+#PLEASE RENAME REPO!!!
 
 ### Multiplayer card game "Durak.sh"
 
