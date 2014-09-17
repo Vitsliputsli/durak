@@ -1,11 +1,7 @@
 #!/bin/sh
 
-server_pipe='server_out.fifo'
-
-rm -f "$server_pipe" && mkfifo "$server_pipe"
-
-port="$1"
-nc="ncat -l $1"
+pipe='server.fifo'
+rm -f "$pipe" && mkfifo "$pipe"
 
 # create cards
 unset card
@@ -51,7 +47,7 @@ deck_pos=36
 echo 'Welcome to net-game Durak'
 echo
 
-while true; do cat "$server_pipe"; done | $nc | while read f;
+while true; do cat $pipe; done | ncat -l $1 | while read f;
 do
 	case "${f%|*}" in
 		'start')
@@ -68,8 +64,8 @@ do
 				done
 				#last card
 				echo 'last card: '"${deck[0]}"
-				echo "lastcard|${deck[0]}" >"$server_pipe"
-				echo "$s" >"$server_pipe"
+				echo "lastcard|${deck[0]}" >"$pipe"
+				echo "$s" >"$pipe"
 			;;
 #		'go')
 				#choose_card "$server_hand"
@@ -84,12 +80,12 @@ done &
 
 #start game
 echo 'wait for connect...'
-echo 'wait' >"$server_pipe"
+echo 'wait' >"$pipe"
 
 
 #user control
 while true; do
-	read u; echo "$u" > "$server_pipe"
+	read u; echo "$u" > "$pipe"
 done
 
 

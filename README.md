@@ -1,5 +1,5 @@
 
-### Multiplayer card game "Durak"
+### Multiplayer card game "Durak.sh"
 
 Server run:
 ```
