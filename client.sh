@@ -1,24 +1,36 @@
 #!/bin/sh
 
 pipe='client.fifo'
-rm -f "$pipe" && mkfifo "$pipe"
+rm -f "$pipe"
+mkfifo "$pipe"
 
-while true; do cat "$pipe"; done | ncat $1 $2 | while read f;
+while true; do cat "$pipe"; done | ncat $1 $2 | while read message;
 do
 
-	case "${f%|*}" in
+	case "${message%|*}" in
+
+	    'server-stoped')
+	        echo 'server is down'
+	        exit 0
+	        ;;
+
 		'wait')
-				echo 'has got answer from server'
-				echo 'start|' >"$pipe"
+			echo 'has got answer from server'
+			echo 'start|' > "$pipe"
 			;;
+
 		'lastcard')
-				echo 'last card: '"${f#*|}"
+			echo 'last card: '"${message#*|}"
 			;;
+
 		'deck')
-				client_hand="${f#*|}"
-				echo 'go|' >"$pipe"
+			client_hand="${message#*|}"
+			echo 'go|' > "$pipe"
 			;;
-		*) echo ">$f";;
+
+		*)
+		    echo ">$message"
+
 	esac
 	#echo 'your deck:'"$client_hand"
 
@@ -26,6 +38,6 @@ done &
 
 echo 'connect to server...'
 
-while true; do
-	read u; echo "$u" > "$pipe"
+while read terminal_input; do
+    echo "$terminal_input" > "$pipe"
 done

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 pipe='server.fifo'
-rm -f "$pipe" && mkfifo "$pipe"
+rm -f $pipe && mkfifo $pipe
 
 # create cards
 unset card
@@ -42,50 +42,64 @@ function choose_card() {
 
 deck_pos=36
 
+echo 'Welcome to net-game Durak.sh'
 
 
-echo 'Welcome to net-game Durak'
-echo
-
-while true; do cat $pipe; done | ncat -l $1 | while read f;
+while true; do cat $pipe; done | ncat -l $1 | while read message;
 do
-	case "${f%|*}" in
+	case "${message%|*}" in
+
+	    'stop')
+	        echo 'server stoped'
+	        echo 'server-stoped' > $pipe
+	        echo $!
+	        echo $$
+	        exit 0
+	        ;;
+
 		'start')
-				echo 'start game'
-				server_hand=''
-				for q in {1..6}; do
-					deck_pos=$[deck_pos-1];
-					server_hand="$server_hand ${deck[$deck_pos]}"
-				done
-				s='deck|'
-				for q in {1..6}; do
-					deck_pos=$[deck_pos-1];
-					s="$s ${deck[$deck_pos]}"
-				done
-				#last card
-				echo 'last card: '"${deck[0]}"
-				echo "lastcard|${deck[0]}" >"$pipe"
-				echo "$s" >"$pipe"
+            echo 'start game'
+            echo 'game started' > $pipe
+
+            server_hand=''
+            for q in {1..6}; do
+                deck_pos=$[deck_pos-1];
+                server_hand="$server_hand ${deck[$deck_pos]}"
+            done
+            s='deck|'
+            for q in {1..6}; do
+                deck_pos=$[deck_pos-1];
+                s="$s ${deck[$deck_pos]}"
+            done
+
+            #last card
+            echo 'last card: '"${deck[0]}"
+            echo "lastcard|${deck[0]}" > $pipe
+            echo "$s" > $pipe
 			;;
+
+
 #		'go')
 				#choose_card "$server_hand"
 				#echo "$choosecard"
-				#read -p '1111111111111' f
+				#read -p '1111111111111' message
 #			;;
-		*) echo ">$f";;
+
+		*)
+		    echo ">$message"
+		    echo 'use {start|go|stop}' > $pipe
+		    ;;
+
 	esac
 	echo 'your deck:'"$server_hand"
 
 done &
 
-#start game
 echo 'wait for connect...'
-echo 'wait' >"$pipe"
+echo 'wait' > $pipe
 
-
-#user control
-while true; do
-	read u; echo "$u" > "$pipe"
+while read terminal_input; do
+    echo $terminal_input > $pipe
 done
 
 
