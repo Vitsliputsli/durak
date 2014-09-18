@@ -1,24 +1,32 @@
 #!/bin/bash
 pipe='server.fifo'
 port=60000
-nport=$[port+1]
-rm -f $pipe && mkfifo $pipe
+nport=$port
+rm -f "$pipe" && mkfifo "$pipe"
+
 
 function work_with_player {
-	while true; do cat $pipe; done | ( ncat -lk $nport || echo 'error' ) | while read message;
-	do
-		#if [ "x$message" == 'xDurakNewPlayer' ]; then work_with_player; fi
-		echo "$message"
-		if [ "x$message" == 'xerror' ]; then break; fi
-	done && echo 'exit' &
+	echo 'work_with_player'
+	num_player=${#player_port[*]}
+	while true; do nport=$[nport+1]
+		rm -f "${player_port}.fifo" && mkfifo "${player_port}.fifo"
+		echo "port:$nport"
+		#while true; do cat "$pipe"; done | ncat -lk $nport | while read message;
+		while [ "x$mes" != 'x:stop' ]; do mes=`cat "$pipe"`; echo "$mes"; done | ( ncat -lk $nport || echo ':stop' > "$pipe" ) | while read message;
+			do
+				echo "$message" > "${player_port}.fifo"
+			done
+	done &
+	while [ $num_player -eq ${#player_port[*]} ]; do sleep 0.01; done
+	echo "player:${player_port[num_player]}"
 }
 
-while true; do cat $pipe; done | ncat -lk $port | while read message;
+while [ "x$mes" != 'x:stop' ]; do mes=`cat "$pipe"`; echo "$mes"; done | ( ncat -lk $port || echo ':stop' > "$pipe" ) | while read message;
 do
-	if [ "x$message" == 'xDurakNewPlayer' ]; then work_with_player; fi
+	[ "x$message" == 'xDurakNewPlayer' ] && work_with_player
 done 
 
-####################################
+#####################################
 exit
 #####################################
 
