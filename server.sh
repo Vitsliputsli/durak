@@ -1,7 +1,26 @@
-#!/bin/sh
-
+#!/bin/bash
 pipe='server.fifo'
+port=60000
+nport=$[port+1]
 rm -f $pipe && mkfifo $pipe
+
+function work_with_player {
+	while true; do cat $pipe; done | ( ncat -lk $nport || echo 'error' ) | while read message;
+	do
+		#if [ "x$message" == 'xDurakNewPlayer' ]; then work_with_player; fi
+		echo "$message"
+		if [ "x$message" == 'xerror' ]; then break; fi
+	done && echo 'exit' &
+}
+
+while true; do cat $pipe; done | ncat -lk $port | while read message;
+do
+	if [ "x$message" == 'xDurakNewPlayer' ]; then work_with_player; fi
+done 
+
+####################################
+exit
+#####################################
 
 # create cards
 unset card
@@ -30,22 +49,11 @@ for q in {0..35}; do
     done
 done
 
-function choose_card() {
-	q2=1
-	for q in $1; do
-		echo "$q2) $q"
-		q2=$[q2+1]
-	done
-	#read -p 'Choose card:' choosecard
-	return
-}
-
 deck_pos=36
 
 echo 'Welcome to net-game Durak.sh'
 
-
-while true; do cat $pipe; done | ncat -l $1 | while read message;
+while true; do cat $pipe; done | ncat -l $port | while read message;
 do
 	case "${message%|*}" in
 
@@ -78,13 +86,6 @@ do
             echo "$s" > $pipe
 			;;
 
-
-#		'go')
-				#choose_card "$server_hand"
-				#echo "$choosecard"
-				#read -p '1111111111111' message
-#			;;
-
 		*)
 		    echo ">$message"
 		    echo 'use {start|go|stop}' > $pipe
@@ -101,7 +102,3 @@ echo 'wait' > $pipe
 while read terminal_input; do
     echo $terminal_input > $pipe
 done
-
-
-
-

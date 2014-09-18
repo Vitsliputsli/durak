@@ -1,5 +1,4 @@
-#!/bin/sh
-
+#!/bin/bash
 pipe='client.fifo'
 rm -f "$pipe"
 mkfifo "$pipe"
