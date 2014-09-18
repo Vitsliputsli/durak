@@ -1,24 +1,35 @@
 #!/bin/bash
 pipe='server.fifo'
 port=60000
-nport=$port
+player_port=$port
 rm -f "$pipe" && mkfifo "$pipe"
 
+unset player_ports
+a=0
 
 function work_with_player {
-	echo 'work_with_player'
-	num_player=${#player_port[*]}
-	while true; do nport=$[nport+1]
+	#echo 'work_with_player'
+	num_player=${#player_ports[*]}
+	
+	while true; do player_port=$[player_port+1]
 		rm -f "${player_port}.fifo" && mkfifo "${player_port}.fifo"
-		echo "port:$nport"
-		#while true; do cat "$pipe"; done | ncat -lk $nport | while read message;
-		while [ "x$mes" != 'x:stop' ]; do mes=`cat "$pipe"`; echo "$mes"; done | ( ncat -lk $nport || echo ':stop' > "$pipe" ) | while read message;
+		#echo "port:$player_port"
+		while [ "x$mes" != 'x:stop' ]; do 
+				mes=`cat "${player_port}.fifo"`
+				[ "x$mes" == "x:ok" ] && player_ports[${#player_ports[*]}]=$player_port;
+				echo "$mes"; 
+			done \
+			| ( ncat -lk $player_port && echo ':ok' > "${player_port}pp.fifo" || echo ':stop' > "${player_port}.fifo" ) \
+			| while read message;
 			do
 				echo "$message" > "${player_port}.fifo"
 			done
 	done &
-	while [ $num_player -eq ${#player_port[*]} ]; do sleep 0.01; done
-	echo "player:${player_port[num_player]}"
+	(
+		echo "num_player:$num_player"
+		while [ $num_player -eq ${#player_ports[*]} ]; do sleep 1; echo "wait:$num_player:${#player_ports[*]}"; done 
+		echo "player:${player_ports[$num_player]}"
+	)
 }
 
 while [ "x$mes" != 'x:stop' ]; do mes=`cat "$pipe"`; echo "$mes"; done | ( ncat -lk $port || echo ':stop' > "$pipe" ) | while read message;
